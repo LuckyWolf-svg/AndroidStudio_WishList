@@ -64,7 +64,6 @@ data class Wish(
     val isCompleted: Boolean = false
 )
 
-// Функция для сохранения фото в файловую систему
 private fun savePhotoToInternalStorage(context: Context, uri: Uri): String {
     val contentResolver = context.contentResolver
     val inputStream = contentResolver.openInputStream(uri) ?: return ""
@@ -79,7 +78,6 @@ private fun savePhotoToInternalStorage(context: Context, uri: Uri): String {
     return fileName
 }
 
-// Функция для загрузки фото из файловой системы
 private fun loadPhotoFromInternalStorage(context: Context, fileName: String): Uri {
     val file = File(context.filesDir, fileName)
     return Uri.fromFile(file)
@@ -125,7 +123,6 @@ fun WishApp() {
     val currentList = if (isArchive) completedWishes else wishes
     val title = if (isArchive) "Выполненные" else "Мои желания"
 
-    // Функция для начала редактирования
     fun startEditWish(wish: Wish) {
         editingWish = wish
         editName = wish.name
@@ -136,16 +133,12 @@ fun WishApp() {
         showEditDialog = true
     }
 
-    // Функция для сохранения изменений
     fun saveEditWish() {
         editingWish?.let { oldWish ->
             val photoFileName = editPhotoUri?.let { uri ->
-                // Проверяем, это новый Uri или уже сохраненный
                 if (uri.toString().startsWith("file://")) {
-                    // Уже сохраненный файл
                     File(uri.path!!).name
                 } else {
-                    // Новое фото из галереи
                     savePhotoToInternalStorage(context, uri)
                 }
             }
@@ -372,8 +365,6 @@ fun WishApp() {
                 }
             }
         }
-
-        // Диалог добавления желания (с квадратом для фото слева)
         if (showAddDialog) {
             Dialog(onDismissRequest = { showAddDialog = false }) {
                 Surface(
@@ -390,7 +381,6 @@ fun WishApp() {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Квадрат для выбора фото с карандашом (слева)
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
@@ -446,7 +436,6 @@ fun WishApp() {
 
                             Spacer(Modifier.width(16.dp))
 
-                            // Поля ввода (справа от квадрата)
                             Column(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -506,7 +495,6 @@ fun WishApp() {
             }
         }
 
-        // Диалог редактирования желания
         if (showEditDialog) {
             Dialog(onDismissRequest = {
                 editingWish = null
@@ -529,7 +517,6 @@ fun WishApp() {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Квадрат для выбора фото с карандашом (слева)
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
@@ -585,7 +572,6 @@ fun WishApp() {
 
                             Spacer(Modifier.width(16.dp))
 
-                            // Поля ввода (справа от квадрата)
                             Column(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -643,7 +629,7 @@ fun WishApp() {
 @Composable
 fun WishItem(
     wish: Wish,
-    context: Context, // Добавлен параметр context
+    context: Context,
     isArchive: Boolean,
     onComplete: () -> Unit,
     onDelete: () -> Unit,
@@ -651,7 +637,6 @@ fun WishItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Загружаем фото из файловой системы
     val photoUri = wish.photoUri?.let { fileName ->
         loadPhotoFromInternalStorage(context, fileName)
     }
@@ -689,7 +674,6 @@ fun WishItem(
                 Icon(Icons.Default.MoreVert, tint = Color(0xFF2196F3), contentDescription = null)
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                // Кнопка "Изменить" (доступна всегда)
                 DropdownMenuItem(
                     text = { Text("Изменить") },
                     onClick = {
@@ -728,7 +712,7 @@ private fun saveAllWishes(context: Context, all: List<Wish>) {
         array.put(JSONObject().apply {
             put("name", wish.name)
             put("price", wish.price)
-            put("photoFileName", wish.photoUri) // Сохраняем имя файла
+            put("photoFileName", wish.photoUri)
             put("isCompleted", wish.isCompleted)
         })
     }
@@ -749,7 +733,7 @@ private fun loadAllWishes(context: Context): List<Wish> {
             Wish(
                 name = obj.getString("name"),
                 price = if (obj.isNull("price")) null else obj.getString("price"),
-                photoUri = photoFileName, // Сохраняем только имя файла
+                photoUri = photoFileName,
                 isCompleted = obj.optBoolean("isCompleted", false)
             )
         }
